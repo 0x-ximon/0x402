@@ -1,5 +1,5 @@
 # 0x402
-0x402 aims to simplify x402 Integration on Aptos for Go web applications. It provides a simple and easy-to-use CLI for kickstarting a new Go x402 application or integrating into existing applications.
+0x402 aims to simplify x402 Integration on Aptos for Go web applications. It provides a simple and easy-to-use CLI for kick starting a new Go x402 application or integrating into existing applications.
 
 ## Installation
 
