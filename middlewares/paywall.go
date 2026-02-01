@@ -3,6 +3,7 @@ package middlewares
 import (
 	"encoding/base64"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -37,6 +38,7 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 
 			paymentPayload, err := services.BuildPayment(params)
 			if err != nil {
+				slog.Error("building payment payload failed", "error", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
@@ -45,6 +47,7 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 			if paymentSignature == "" {
 				requirementJson, err := json.Marshal(paymentPayload)
 				if err != nil {
+					slog.Error("requirement signature marshal failed", "error", err)
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 					return
 				}
@@ -65,6 +68,7 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 
 			decodedBytes, err := base64.StdEncoding.DecodeString(paymentSignature)
 			if err != nil {
+				slog.Error("signature decoding failed", "error", err)
 				http.Error(w, "Invalid payment signature", http.StatusBadRequest)
 				return
 			}
@@ -72,6 +76,7 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 			var paymentRequirement services.X402Requirements
 			err = json.Unmarshal(decodedBytes, &paymentRequirement)
 			if err != nil {
+				slog.Error("payment requirement unmarshal failed", "error", err)
 				http.Error(w, "Invalid payment signature", http.StatusBadRequest)
 				return
 			}
@@ -84,12 +89,14 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 
 			err = services.VerifyPayment(paymentParams)
 			if err != nil {
+				slog.Error("payment verification failed", "error", err)
 				http.Error(w, "Payment verification failed", http.StatusBadRequest)
 				return
 			}
 
 			result, err := services.SettlePayment(paymentParams)
 			if err != nil {
+				slog.Error("payment settlement failed", "error", err)
 				http.Error(w, "Payment settlement failed", http.StatusInternalServerError)
 				return
 			}
@@ -103,6 +110,7 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 
 			transactionJson, err := json.Marshal(tx)
 			if err != nil {
+				slog.Error("transaction unmarshal failed", "error", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
