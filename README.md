@@ -14,40 +14,45 @@ go get -u github.com/0x-ximon/0x402
 You can configure 0x402 by setting environment variables or by using a configuration file. Here's an example of how to configure 0x402 using environment variables:
 
 ```go 
+package main
+
 import (
-		"github.com/0x-ximon/0x402/middlewares"
+	"log"
+	"net/http"
+
+	"github.com/0x-ximon/0x402/middlewares"
 )
 
 func main() {
-		mux := http.NewServeMux()
-		addr := "http://localhost:8080"
-	
-		cfg := middlewares.PaymentConfig{
-				Amount:      10000, // 0.01 USDC
-				Receiver:    "YOUR_ADDRESS",
-				Description: "Aptos is Awesome",
-				Asset:       "0x69091fbab5f7d635ee7ac5098cf0c1efbe31d68fec0f2cd565e8d168daf52832", // USDC on Aptos
-		}
-	
-		// The Guard accepts a configuration struct and provides 2 Paywall middleware
-		// functions that are compatible with the Go standard http package. You can
-		// set it to nil and use the default configuration
-		guard := middlewares.NewGuard(nil)
-	
-		// Helper function to create chain of middlewares
-		chain := middlewares.NewChain(
-				// The StandardPaywall middleware is used to protect the entire
-				// application and takes the payment config
-				guard.StandardPaywall(cfg),
-		)
-	
-		server := http.Server{
-				Addr:    addr,
-				Handler: chain(mux),
-		}
-	
-		log.Printf("Starting server on %s", addr)
-		server.ListenAndServe()
+	mux := http.NewServeMux()
+	addr := "http://localhost:8080"
+
+	cfg := middlewares.PaymentConfig{
+		Amount:      10000, // 0.01 USDC
+		Receiver:    "YOUR_ADDRESS",
+		Description: "Aptos is Awesome",
+		Asset:       "0x69091fbab5f7d635ee7ac5098cf0c1efbe31d68fec0f2cd565e8d168daf52832", // USDC on Aptos
+	}
+
+	// The Guard accepts a configuration struct and provides 2 Paywall middleware
+	// functions that are compatible with the Go standard http package. You can
+	// set it to nil and use the default configuration
+	guard := middlewares.NewGuard(nil)
+
+	// Helper function to create chain of middlewares
+	chain := middlewares.NewChain(
+		// The StandardPaywall middleware is used to protect the entire
+		// application and takes the payment config
+		guard.StandardPaywall(cfg),
+	)
+
+	server := http.Server{
+		Addr:    addr,
+		Handler: chain(mux),
+	}
+
+	log.Printf("Starting server on %s", addr)
+	server.ListenAndServe()
 }
 ```
 
