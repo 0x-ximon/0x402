@@ -69,6 +69,15 @@ type PaymentResult struct {
 	Network       string  `json:"network"`
 }
 
+type PaymentTransation struct {
+	ID       string `json:"id"`
+	Sender   string `json:"sender"`
+	Receiver string `json:"receiver"`
+	Network  string `json:"network"`
+}
+
+type PaymentTransactionKey struct{}
+
 func BuildPayment(params BuildPaymentParams) (*X402Payload, error) {
 	if params.Request == nil {
 		return nil, errors.New("request is nil")

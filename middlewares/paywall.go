@@ -95,19 +95,13 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 				return
 			}
 
-			type Transaction struct {
-				ID       string `json:"id"`
-				Sender   string `json:"sender"`
-				Receiver string `json:"receiver"`
-				Network  string `json:"network"`
-			}
-
-			ctx := context.WithValue(r.Context(), "transaction", Transaction{
-				ID:       result.Transaction,
-				Network:  result.Network,
-				Receiver: payment.Receiver,
-				Sender:   result.Payer,
-			})
+			ctx := context.WithValue(r.Context(), services.PaymentTransactionKey{},
+				services.PaymentTransation{
+					ID:       result.Transaction,
+					Network:  result.Network,
+					Receiver: payment.Receiver,
+					Sender:   result.Payer,
+				})
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
