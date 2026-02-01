@@ -51,7 +51,8 @@ func main() {
 }
 ```
 
-> [!IMPORTANT] Only the `StandardPaywall` middleware has been fully implemented. The `ResourcePaywall` middleware is currently in development and will be available soon.
+> [!WARNING]
+> Only the `StandardPaywall` middleware has been fully implemented. The `ResourcePaywall` middleware is currently in development and will be available soon.
 
 ## Installation
 
@@ -60,6 +61,7 @@ Although this feature is currently in development, you can install this package 
 ```bash
 go install github.com/0x-ximon/0x402@latest
 ```
+<img width="996" height="502" alt="image" src="https://github.com/user-attachments/assets/965acaef-157b-45c2-99a9-329950ae6cf2" />
 
 ### Commands
 
