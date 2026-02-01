@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
@@ -42,7 +41,7 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 				return
 			}
 
-			paymentSignature := r.Header.Get("payment-signature")
+			paymentSignature := r.Header.Get("Payment-Signature")
 			if paymentSignature == "" {
 				requirementJson, err := json.Marshal(paymentPayload)
 				if err != nil {
@@ -53,7 +52,7 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 				paymentSignature := base64.StdEncoding.EncodeToString(requirementJson)
 
 				w.Header().Set("Content-Type", "application/json")
-				w.Header().Set("PAYMENT-REQUIRED", paymentSignature)
+				w.Header().Set("Payment-Required", paymentSignature)
 				w.WriteHeader(http.StatusPaymentRequired)
 
 				json.NewEncoder(w).Encode(PaymentErrorResponse{
@@ -95,15 +94,23 @@ func (g *Guard) StandardPaywall(payment PaymentConfig) middleware {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), services.PaymentTransactionKey{},
-				services.PaymentTransation{
-					ID:       result.Transaction,
-					Network:  result.Network,
-					Receiver: payment.Receiver,
-					Sender:   result.Payer,
-				})
+			tx := services.PaymentTransation{
+				ID:       result.Transaction,
+				Network:  result.Network,
+				Receiver: payment.Receiver,
+				Sender:   result.Payer,
+			}
 
-			next.ServeHTTP(w, r.WithContext(ctx))
+			transactionJson, err := json.Marshal(tx)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+
+			transactionSignature := base64.StdEncoding.EncodeToString(transactionJson)
+			w.Header().Set("Payment-Transaction", transactionSignature)
+
+			next.ServeHTTP(w, r)
 		})
 	}
 }
